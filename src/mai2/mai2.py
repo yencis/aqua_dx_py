@@ -75,6 +75,15 @@ def get_ratings(summary: PlayerSummary) -> tuple[list[RatingPlay], list[RatingPl
         raise ValueError("Not a Maimai PlayerSummary")
 
 
+def get_recent_scores(summary: PlayerSummary) -> list[RecentScore]:
+    """
+    Get 100 most recent scores from this summary
+    :param summary: PlayerSummary
+    :return: list of RecentScores
+    """
+    return summary.recent
+
+
 def view_rating_play(play: RatingPlay, ms: MusicSearch, force=False) -> RatingPlayReadable:
     song = ms.search(play.song_id, force=force)
     rf_pair = get_rank_factor(play.achievement)
