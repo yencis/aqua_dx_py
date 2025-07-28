@@ -1,7 +1,10 @@
 from src.game.types import PlayerSummary
+from src.game.game import get_summary
+from src.card import card
 from .types import RatingPlay, RatingComposition, RatingPlayReadable, RecentScore, RecentPlayReadable
 from collections import namedtuple
 from src.mai2.music.search import MusicSearch
+from ..types import Game
 
 RFPair = namedtuple('RFPair', ['rank', 'factor'])
 
@@ -26,6 +29,24 @@ ACHIEVEMENT_MAP = {
     100000: RFPair("D", 0.016),
     0: RFPair("F", 0)
 }
+
+
+def get_maimai_summary(username: str):
+    """
+    Player summary but specifically for Maimai
+    :param username: username
+    :return: player summary
+    """
+    return get_summary(username=username, game=Game.MAI2)
+
+
+def get_maimai_user_card(username: str):
+    """
+    Player card but specifically for Maimai
+    :param username: username
+    :return: player summary
+    """
+    return card.get_game_card(card=card.get_user_card(username), game=Game.MAI2)
 
 
 def get_rank_factor(achievement: int) -> RFPair:

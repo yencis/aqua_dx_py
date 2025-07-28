@@ -1,7 +1,7 @@
 from src.mai2.music.search import MusicSearch
 from src.game.game import get_summary
 from src.types import Game
-from src.mai2.mai2 import get_ratings, view_rating_play, view_recent_score
+from src.mai2.mai2 import get_ratings, view_rating_play, view_recent_score, get_maimai_summary, get_maimai_user_card
 
 import inspect
 
@@ -14,13 +14,15 @@ import inspect
 #     x = RecentScore.model_validate(j)
 #     print(x)
 
-ms = MusicSearch()
-summary = get_summary("uencis", Game.MAI2)
-# # print(len(summary.recent))
-# # print(get_rating(0.224, 100700, 13.9))
-ratings_15, ratings_35 = get_ratings(summary)
-print([view_rating_play(p, ms) for p in ratings_15])
-print([view_recent_score(r, ms) for r in summary.recent])
+# ms = MusicSearch()
+# summary = get_summary("uencis", Game.MAI2)
+# # # print(len(summary.recent))
+# # # print(get_rating(0.224, 100700, 13.9))
+# ratings_15, ratings_35 = get_ratings(summary)
+# print([view_rating_play(p, ms) for p in ratings_15])
+# print([view_recent_score(r, ms) for r in summary.recent])
+
+print(get_maimai_user_card("uencis"))
 
 # i_s = ImageSearch()
 # img_url = i_s.get_image_url("111234")
