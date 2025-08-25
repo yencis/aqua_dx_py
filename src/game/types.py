@@ -67,3 +67,11 @@ class PlayerSummary(BaseModel):  # I think this is the same for all games, but I
                 raise ValueError("Unknown Game")
         else:
             return v
+
+    def get_recents(self, n=None):
+        """
+        Get last `n` recents, or all recent scores if not specified.
+        :param n: number of recent scores to get
+        :return: list of scores
+        """
+        return self.recent[:n]

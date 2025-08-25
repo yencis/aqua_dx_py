@@ -49,12 +49,14 @@ class MusicSearch:
         :return: Object
         """
         if self.LOADED:
+            if query not in self.ONLINE_MUSIC:
+                raise KeyError("Song does not exist in Maimai!")
             return Song.model_validate(self.ONLINE_MUSIC[query])
         else:
             if query not in self.LOCAL_MUSIC:
                 if force:  # maybe not up to date
                     self._load_online()
-                    return Song.model_validate(self.ONLINE_MUSIC[query])
+                    return self.search(query)
                 else:
                     raise KeyError("Song not found")
             else:

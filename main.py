@@ -1,10 +1,16 @@
 from src.mai2.music.search import MusicSearch
-from src.game.game import get_summary
-from src.types import Game
-from src.mai2.mai2 import get_ratings, view_rating_play, view_recent_score, get_maimai_summary, get_maimai_user_card
+# from src.game.game import get_summary
+# from src.types import Game
+# from src.mai2.mai2 import get_ratings, view_rating_play, view_recent_score, get_maimai_summary, get_maimai_user_card
 
+from src.mai2.mai2 import MaimaiClient
 import inspect
 
+mc = MaimaiClient()
+ms = MusicSearch(autoload=True)
+print(mc.get_maimai_user_card("uencis"))
+ps = mc.get_maimai_summary("uencis")
+print(mc.view_recent_score(ps.get_recents(3)[-1], ms=ms))
 # card = card_ops.get_user_card("uencis")
 # print(card_ops.get_game_card(card, "mai2"))
 
@@ -22,7 +28,7 @@ import inspect
 # print([view_rating_play(p, ms) for p in ratings_15])
 # print([view_recent_score(r, ms) for r in summary.recent])
 
-print(get_maimai_user_card("uencis"))
+# print(get_maimai_user_card("uenhhjhcis"))
 
 # i_s = ImageSearch()
 # img_url = i_s.get_image_url("111234")

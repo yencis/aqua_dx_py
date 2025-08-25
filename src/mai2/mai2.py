@@ -1,6 +1,6 @@
 from src.game.types import PlayerSummary
-from src.game.game import get_summary
-from src.card import card
+from src.game.game import GameClient
+from src.card.card import CardClient
 from .types import RatingPlay, RatingComposition, RatingPlayReadable, RecentScore, RecentPlayReadable
 from collections import namedtuple
 from src.mai2.music.search import MusicSearch
@@ -31,31 +31,21 @@ ACHIEVEMENT_MAP = {
 }
 
 
-def get_maimai_summary(username: str):
-    """
-    Player summary but specifically for Maimai
-    :param username: username
-    :return: player summary
-    """
-    return get_summary(username=username, game=Game.MAI2)
-
-
-def get_maimai_user_card(username: str):
-    """
-    Player card but specifically for Maimai
-    :param username: username
-    :return: player summary
-    """
-    return card.get_game_card(card=card.get_user_card(username), game=Game.MAI2)
-
-
-def get_rank_factor(achievement: int) -> RFPair:
+def get_rank_factor(achievement: float) -> RFPair:
     for k, v in ACHIEVEMENT_MAP.items():  # assume ordered
         if achievement >= k:
             return v
 
 
-def get_rating(factor: float, achievement: int, level: float) -> int:
+def get_rating(achievement: float, level: float) -> int:
+    """
+    Get score rating based off of parameters
+    :param factor:
+    :param achievement:
+    :param level:
+    :return: int
+    """
+    factor = get_rank_factor(achievement).factor
     return int(factor * min(achievement / 10000., 100.5) * level)
 
 
@@ -65,9 +55,11 @@ def get_ratings(summary: PlayerSummary) -> tuple[list[RatingPlay], list[RatingPl
     :param summary:
     :return:
     """
+
     def process_best(best: str) -> list[RatingPlay]:
-        return [RatingPlay.model_validate(dict(zip(["song_id", "song_index", "version", "achievement"], s.split(":"))))
-                for s in best.split(",")]
+        return [
+            RatingPlay.model_validate(dict(zip(["song_id", "song_index", "version", "achievement"], s.split(":"))))
+            for s in best.split(",")]
 
     if isinstance(summary.ratingComposition, RatingComposition):
         return process_best(summary.ratingComposition.best15), process_best(summary.ratingComposition.best35)
@@ -75,34 +67,48 @@ def get_ratings(summary: PlayerSummary) -> tuple[list[RatingPlay], list[RatingPl
         raise ValueError("Not a Maimai PlayerSummary")
 
 
-def get_recent_scores(summary: PlayerSummary) -> list[RecentScore]:
-    """
-    Get 100 most recent scores from this summary
-    :param summary: PlayerSummary
-    :return: list of RecentScores
-    """
-    return summary.recent
+class MaimaiClient:
+    def __init__(self):
+        self.game = GameClient()
+        self.card = CardClient()
+        self.ms = MusicSearch()
 
+    def get_maimai_summary(self, username: str):
+        """
+        Player summary but specifically for Maimai
+        :param username: username
+        :return: player summary
+        """
+        return self.game.get_summary(username=username, game=Game.MAI2)
 
-def view_rating_play(play: RatingPlay, ms: MusicSearch, force=False) -> RatingPlayReadable:
-    song = ms.search(play.song_id, force=force)
-    rf_pair = get_rank_factor(play.achievement)
-    difficulty = song.notes[play.song_index]["lv"]
-    rating = get_rating(rf_pair.factor, play.achievement, difficulty)
-    return RatingPlayReadable(song=song,
-                              rating=rating,
-                              difficulty=difficulty,
-                              rank=rf_pair.rank,
-                              achievement=play.achievement/10000.)
+    def get_maimai_user_card(self, username: str):
+        """
+        Player card but specifically for Maimai
+        :param username: username
+        :return: player summary
+        """
+        return self.card.get_game_card(card=self.card.get_user_card(username), game=Game.MAI2)
 
+    def view_rating_play(self, play: RatingPlay, ms=None, force=False) -> RatingPlayReadable:
+        ms = ms or self.ms
+        song = ms.search(play.song_id, force=force)
+        rf_pair = get_rank_factor(play.achievement)
+        difficulty = song.notes[play.song_index]["lv"]
+        rating = get_rating(play.achievement, difficulty)
+        return RatingPlayReadable(song=song,
+                                  rating=rating,
+                                  difficulty=difficulty,
+                                  rank=rf_pair.rank,
+                                  achievement=play.achievement / 10000.)
 
-def view_recent_score(recent: RecentScore, ms: MusicSearch, force=False) -> RecentPlayReadable:
-    song = ms.search(str(recent.musicId), force=force)
-    rf_pair = get_rank_factor(recent.achievement)
-    difficulty = song.notes[recent.level]["lv"]
-    rating = get_rating(rf_pair.factor, recent.achievement, difficulty)
-    return RecentPlayReadable(song=song,
-                              rating=rating,
-                              difficulty=difficulty,
-                              rank=rf_pair.rank,
-                              achievement=recent.achievement/10000.)
+    def view_recent_score(self, recent: RecentScore, ms=None, force=False) -> RecentPlayReadable:
+        ms = ms or self.ms
+        song = ms.search(str(recent.musicId), force=force)
+        rf_pair = get_rank_factor(recent.achievement)
+        difficulty = song.notes[recent.level]["lv"]
+        rating = get_rating(recent.achievement, difficulty)
+        return RecentPlayReadable(song=song,
+                                  rating=rating,
+                                  difficulty=difficulty,
+                                  rank=rf_pair.rank,
+                                  achievement=recent.achievement / 10000.)

@@ -12,6 +12,7 @@ class RatingPlayReadable(BaseModel):
 
 class RecentPlayReadable(BaseModel):
     song: Song
+    rating: int
     rank: str
     achievement: float
     difficulty: float
